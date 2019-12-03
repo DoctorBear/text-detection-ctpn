@@ -38,6 +38,8 @@ def _get_blobs(im, rois):
 
 
 def test_ctpn(sess, net, im, boxes=None):
+    # blobs['rois']===None
+    # im_scales:缩放比例
     blobs, im_scales = _get_blobs(im, boxes)
     if cfg.TEST.HAS_RPN:
         im_blob = blobs['data']
@@ -48,7 +50,7 @@ def test_ctpn(sess, net, im, boxes=None):
     if cfg.TEST.HAS_RPN:
         feed_dict = {net.data: blobs['data'], net.im_info: blobs['im_info'], net.keep_prob: 1.0}
 
-    rois = sess.run([net.get_output('rois')[0]],feed_dict=feed_dict)
+    rois = sess.run([net.get_output('rois')[0]], feed_dict=feed_dict)
     rois=rois[0]
 
     scores = rois[:, 0]

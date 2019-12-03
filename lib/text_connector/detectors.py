@@ -15,7 +15,6 @@ class TextDetector:
         elif self.mode == "O":
             self.text_proposal_connector=TextProposalConnectorOriented()
 
-        
     def detect(self, text_proposals,scores,size):
         # 删除得分较低的proposal
         keep_inds=np.where(scores>TextLineCfg.TEXT_PROPOSALS_MIN_SCORE)[0]

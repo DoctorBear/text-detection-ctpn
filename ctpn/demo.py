@@ -19,14 +19,18 @@ from lib.text_connector.text_connect_cfg import Config as TextLineCfg
 
 
 def resize_im(im, scale, max_scale=None):
-    f = float(scale) / min(im.shape[0], im.shape[1])
-    if max_scale != None and f * max(im.shape[0], im.shape[1]) > max_scale:
+    height, width, channel = im.shape
+    f = float(scale) / min(height, width)
+    if max_scale is not None and f * max(height, im.shape[1]) > max_scale:
         f = float(max_scale) / max(im.shape[0], im.shape[1])
-    return cv2.resize(im, None, None, fx=f, fy=f, interpolation=cv2.INTER_LINEAR), f
+    im1 = cv2.resize(im, None, None, fx=f/2, fy=f/2, interpolation=cv2.INTER_LINEAR)
+    temp = np.ones((int(height*f), int(width*f), 3), np.uint8)*255
+    temp[0:int(height*f/2), 0:int(width*f/2), :] = im1
+    im1 = cv2.resize(im, None, None, fx=f, fy=f, interpolation=cv2.INTER_LINEAR)
+    return im1, temp, f
 
 
-def draw_boxes(img, image_name, boxes, scale):
-    base_name = image_name.split('/')[-1]
+def draw_boxes(img, base_name, boxes, scale):
     with open('data/results/' + 'res_{}.txt'.format(base_name.split('.')[0]), 'w') as f:
         for box in boxes:
             if np.linalg.norm(box[0] - box[1]) < 5 or np.linalg.norm(box[3] - box[0]) < 5:
@@ -52,17 +56,35 @@ def draw_boxes(img, image_name, boxes, scale):
     cv2.imwrite(os.path.join("data/results", base_name), img)
 
 
+# It's found that this demo cannot detect text too large.
+# So the resize and pad is needed.
+# But because the resize of im1, its boxes isn't as accurate as the im's,
+# so this combination is based on im and add new box in boxes1 to boxes
+def combine(boxes, boxes1):
+    for box1 in boxes1:
+        for box in boxes:
+            pass
+
+
 def ctpn(sess, net, image_name):
     timer = Timer()
     timer.tic()
 
     img = cv2.imread(image_name)
-    img, scale = resize_im(img, scale=TextLineCfg.SCALE, max_scale=TextLineCfg.MAX_SCALE)
+    img, img1, scale = resize_im(img, scale=TextLineCfg.SCALE, max_scale=TextLineCfg.MAX_SCALE)
+    print(scale)
     scores, boxes = test_ctpn(sess, net, img)
+    base_name = image_name.split('\\')[-1]
+    base_name, extension = base_name.split('.')
 
     textdetector = TextDetector()
     boxes = textdetector.detect(boxes, scores[:, np.newaxis], img.shape[:2])
-    draw_boxes(img, image_name, boxes, scale)
+    draw_boxes(img, base_name+'.'+extension, boxes, scale)
+
+    scores1, boxes1 = test_ctpn(sess, net, img1)
+    boxes1 = textdetector.detect(boxes1, scores1[:, np.newaxis], img1.shape[:2])
+
+    draw_boxes(img1, base_name+"(1)."+extension, boxes1, scale)
     timer.toc()
     print(('Detection took {:.3f}s for '
            '{:d} object proposals').format(timer.total_time, boxes.shape[0]))
@@ -73,9 +95,10 @@ if __name__ == '__main__':
         shutil.rmtree("data/results/")
     os.makedirs("data/results/")
 
-    cfg_from_file('ctpn/text.yml')
+    cfg_from_file('text.yml')
 
     # init session
+    # allow_soft_placement 允许自动分配设备
     config = tf.ConfigProto(allow_soft_placement=True)
     sess = tf.Session(config=config)
     # load network

@@ -270,12 +270,7 @@ class Network(object):
     def spatial_reshape_layer(self, input, d, name):
         input_shape = tf.shape(input)
         # transpose: (1, H, W, A x d) -> (1, H, WxA, d)
-        return tf.reshape(input,\
-                               [input_shape[0],\
-                                input_shape[1], \
-                                -1,\
-                                int(d)])
-
+        return tf.reshape(input, [input_shape[0], input_shape[1], -1, int(d)])
 
     @layer
     def lrn(self, input, radius, alpha, beta, name, bias=1.0):
