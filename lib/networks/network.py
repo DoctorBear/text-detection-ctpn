@@ -97,7 +97,7 @@ class Network(object):
             lstm_fw_cell = tf.contrib.rnn.LSTMCell(d_h, state_is_tuple=True)
             lstm_bw_cell = tf.contrib.rnn.LSTMCell(d_h, state_is_tuple=True)
 
-            lstm_out, last_state = tf.nn.bidirectional_dynamic_rnn(lstm_fw_cell,lstm_bw_cell, img, dtype=tf.float32)
+            lstm_out, last_state = tf.nn.bidirectional_dynamic_rnn(lstm_fw_cell, lstm_bw_cell, img, dtype=tf.float32)
             lstm_out = tf.concat(lstm_out, axis=-1)
 
             lstm_out = tf.reshape(lstm_out, [N * H * W, 2*d_h])
@@ -211,8 +211,8 @@ class Network(object):
             # input[0] shape is (1, H, W, Ax2)
             # rpn_rois <- (1 x H x W x A, 5) [0, x1, y1, x2, y2]
         with tf.variable_scope(name) as scope:
-            blob,bbox_delta = tf.py_func(proposal_layer_py,[input[0],input[1],input[2], cfg_key, _feat_stride, anchor_scales],\
-                                     [tf.float32,tf.float32])
+            blob, bbox_delta = tf.py_func(proposal_layer_py, [input[0], input[1],  input[2], cfg_key, _feat_stride,
+                                                              anchor_scales], [tf.float32, tf.float32])
 
             rpn_rois = tf.convert_to_tensor(tf.reshape(blob,[-1, 5]), name = 'rpn_rois') # shape is (1 x H x W x A, 2)
             rpn_targets = tf.convert_to_tensor(bbox_delta, name = 'rpn_targets') # shape is (1 x H x W x A, 4)

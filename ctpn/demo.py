@@ -21,7 +21,7 @@ from lib.text_connector.text_connect_cfg import Config as TextLineCfg
 def resize_im(im, scale, max_scale=None):
     height, width, channel = im.shape
     f = float(scale) / min(height, width)
-    if max_scale is not None and f * max(height, im.shape[1]) > max_scale:
+    if max_scale is not None and f * max(height, width) > max_scale:
         f = float(max_scale) / max(im.shape[0], im.shape[1])
     im1 = cv2.resize(im, None, None, fx=f/2, fy=f/2, interpolation=cv2.INTER_LINEAR)
     temp = np.ones((int(height*f), int(width*f), 3), np.uint8)*255

@@ -1,5 +1,6 @@
 import numpy as np
 
+
 def generate_basic_anchors(sizes, base_size=16):
     base_anchor = np.array([0, 0, base_size - 1, base_size - 1], np.int32)
     anchors = np.zeros((len(sizes), 4), np.int32)
@@ -30,6 +31,7 @@ def generate_anchors(base_size=16, ratios=[0.5, 1, 2],
         for w in widths:
             sizes.append((h, w))
     return generate_basic_anchors(sizes)
+
 
 if __name__ == '__main__':
     import time

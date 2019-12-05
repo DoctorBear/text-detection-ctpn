@@ -36,6 +36,7 @@ class VGGnet_test(Network):
          .conv(3, 3, 512, 1, 1, name='conv5_2')
          .conv(3, 3, 512, 1, 1, name='conv5_3'))
 
+        # fast rcnn里面的rpn就是这么做的，但是依旧没有查到再加一道卷积的原因
         (self.feed('conv5_3').conv(3, 3, 512, 1, 1, name='rpn_conv/3x3'))
 
         (self.feed('rpn_conv/3x3').Bilstm(512, 128, 512, name='lstm_o'))
