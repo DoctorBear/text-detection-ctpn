@@ -4,6 +4,7 @@ slim = tf.contrib.slim
 
 
 def vgg_arg_scope(weight_decay=0.0005):
+    # slim.arg_scope用来管理超参数
     with slim.arg_scope([slim.conv2d, slim.fully_connected],
                         activation_fn=tf.nn.relu,
                         weights_regularizer=slim.l2_regularizer(weight_decay),
